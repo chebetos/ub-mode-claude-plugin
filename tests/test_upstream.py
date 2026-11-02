@@ -78,3 +78,10 @@ def test_build_request_adds_bearer_token_when_given():
 
 def test_build_request_omits_authorization_without_token():
     assert build_request("https://api.github.com/x", token=None).get_header("Authorization") is None
+
+
+def test_changed_paths_raises_when_the_comparison_hits_the_file_limit():
+    payload = json.dumps({"files": [{"filename": f"f{i}.py"} for i in range(300)]})
+    url = "https://api.github.com/repos/unclebob/crapper/compare/aaa...bbb"
+    with pytest.raises(UpstreamError):
+        GitHub(FakeFetch({url: payload.encode()})).changed_paths("unclebob/crapper", "aaa", "bbb")

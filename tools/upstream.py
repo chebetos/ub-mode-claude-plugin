@@ -10,6 +10,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 API = "https://api.github.com"
+COMPARE_FILE_LIMIT = 300
 
 Fetcher = Callable[[str], bytes]
 
@@ -91,9 +92,15 @@ class GitHub:
 
         Returns:
             Changed file paths in API order.
+
+        Raises:
+            UpstreamError: If the file list reached the API limit and may be truncated.
         """
         data = json.loads(self._fetch(f"{API}/repos/{repo}/compare/{base}...{head}"))
-        return [item["filename"] for item in data.get("files", [])]
+        paths = [item["filename"] for item in data.get("files", [])]
+        if len(paths) >= COMPARE_FILE_LIMIT:
+            raise UpstreamError(f"comparison {repo} {base}...{head} may be truncated")
+        return paths
 
     def extract_tarball(self, repo: str, sha: str, dest: Path) -> Path:
         """Download a commit tarball and extract it without the top-level prefix.
