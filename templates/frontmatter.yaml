@@ -1,0 +1,2 @@
+disable-model-invocation: true
+allowed-tools: Bash(*/ub-mode/scripts/crapper*) Bash(*/ub-mode/scripts/dryer*) Bash(*/ub-mode/scripts/mutator*) Read
