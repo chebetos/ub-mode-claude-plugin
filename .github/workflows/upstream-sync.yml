@@ -15,8 +15,6 @@ concurrency:
 
 env:
   BRANCH: upstream-sync
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   sync:
@@ -25,6 +23,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: astral-sh/setup-uv@v10.3.2
       - uses: pnpm/action-setup@v6.1.0
         with:
@@ -36,6 +35,8 @@ jobs:
 
       - name: Check upstreams
         id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           code=0
           uv run python -m tools.sync --check > "$RUNNER_TEMP/report.json" || code=$?
@@ -47,19 +48,25 @@ jobs:
 
       - name: Apply upstream changes
         if: steps.check.outputs.changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -C "$BRANCH"
-          uv run python -m tools.sync --apply > /dev/null
+          uv run python -m tools.sync --apply > "$RUNNER_TEMP/report.json"
 
+      # Runs vendored upstream code: no token in env, no persisted git credentials.
       - name: Verify plugin
         if: steps.check.outputs.changes == 'true'
         run: tools/verify-plugin.sh
 
       - name: Push branch and open or update PR
         if: steps.check.outputs.changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push --force-with-lease="$BRANCH" origin "$BRANCH"
           {
             echo "Automated weekly sync of upstream commits. Merge with **rebase** to keep one commit per upstream."
