@@ -1,0 +1,16 @@
+{
+  "name": "ub-mode-claude-plugin",
+  "private": true,
+  "description": "Release tooling for the ub-mode Claude Code marketplace.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chebetos/ub-mode-claude-plugin.git"
+  },
+  "packageManager": "pnpm@11.9.0",
+  "devDependencies": {
+    "@semantic-release/changelog": "7.0.0",
+    "@semantic-release/exec": "7.1.0",
+    "@semantic-release/git": "11.0.1",
+    "semantic-release": "25.0.9"
+  }
+}
