@@ -1,8 +1,13 @@
+import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
 
 from tools.build import (
+    TEMPLATES,
     absolutize_links,
     build,
     render_launcher,
@@ -62,6 +67,30 @@ def test_render_launcher_pins_dependencies_and_names_tool():
     template = "# deps: {{dependencies}}\n# tool: {{tool}} {{repo}}@{{sha}}\n"
     out = render_launcher(template, "crapper", "unclebob/crapper", "abc", {"tree-sitter": "0.26.0"})
     assert out == '# deps: "tree-sitter==0.26.0"\n# tool: crapper unclebob/crapper@abc\n'
+
+
+def test_launcher_drops_its_environment_from_path_and_unsets_virtual_env(tmp_path: Path):
+    template = (TEMPLATES / "launcher.py.tmpl").read_text()
+    scripts = tmp_path / "scripts"
+    package = scripts / "vendor" / "fake"
+    package.mkdir(parents=True)
+    (package / "__init__.py").write_text("")
+    (package / "__main__.py").write_text(
+        "import json, os\n"
+        "print(json.dumps({k: os.environ.get(k) for k in ('PATH', 'VIRTUAL_ENV')}))\n"
+    )
+    launcher = scripts / "fake"
+    launcher.write_text(render_launcher(template, "fake", "o/fake", "abc", {}))
+    env_bin = str(Path(sys.executable).parent)
+    env = {**os.environ, "PATH": os.pathsep.join([env_bin, "/usr/bin"]), "VIRTUAL_ENV": "/x"}
+
+    done = subprocess.run(
+        [sys.executable, str(launcher)], env=env, capture_output=True, text=True, check=True
+    )
+
+    seen = json.loads(done.stdout)
+    assert seen["PATH"] == "/usr/bin"
+    assert seen["VIRTUAL_ENV"] is None
 
 
 def _fake_tree(base: Path, name: str, readme: str, license_line: str | None) -> Path:
