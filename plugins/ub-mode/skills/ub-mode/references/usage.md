@@ -14,10 +14,13 @@ resolve their Python dependencies on first run. Each writes machine-readable res
 
 ## Commands
 
+Paths are relative to the skill directory (the absolute paths are in the "Tools in this plugin"
+table of `SKILL.md`).
+
 ```bash
-${CLAUDE_SKILL_DIR}/scripts/crapper [path-or-filter ...]   # writes .metrics/crap.edn
-${CLAUDE_SKILL_DIR}/scripts/dryer   [path-or-filter ...]   # writes .metrics/dry.edn
-${CLAUDE_SKILL_DIR}/scripts/mutator [path-or-filter ...]   # writes .metrics/mutate/*.edn
+scripts/crapper [path-or-filter ...]   # writes .metrics/crap.edn
+scripts/dryer   [path-or-filter ...]   # writes .metrics/dry.edn
+scripts/mutator [path-or-filter ...]   # writes .metrics/mutate/*.edn
 ```
 
 Pass the file you are working on to `mutator`: the first run of a whole tree executes every
@@ -25,15 +28,21 @@ covered mutant and is slow.
 
 Supported languages: Clojure, Java, Go, TypeScript/JavaScript, Rust and Python.
 
-## Known limitation
+## Python projects
 
-For Python projects, crapper may report 0% coverage when launched through `uv run --script`,
-because it installs `coverage` into the interpreter that runs it. Treat a Python coverage of
-exactly 0% on tested code as a tooling gap, not a finding.
+- Give the project its own `.venv` (or `venv`) with `pytest` installed. crapper and mutator both run
+  the project's tests with that interpreter.
+- crapper treats a project as pytest only when it finds pytest configuration (`pytest.ini`,
+  `[tool.pytest.ini_options]`, `conftest.py` ...); otherwise it runs `unittest` and may find no tests.
+- Without a project `.venv`, crapper falls back to `python3` on the `PATH`, which needs `coverage`
+  and `pytest`. mutator falls back to its own interpreter, has no `pytest` and stops with
+  "Baseline failed".
+- Exactly 0% coverage on tested code means the tests did not run. Fix the setup before reading it
+  as a finding.
 
 ## Full upstream documentation
 
-- `${CLAUDE_SKILL_DIR}/references/upstream/crapper.md`
-- `${CLAUDE_SKILL_DIR}/references/upstream/dryer.md`
-- `${CLAUDE_SKILL_DIR}/references/upstream/mutator.md`
-- `${CLAUDE_SKILL_DIR}/references/upstream/uml-viewer.md` (not bundled)
+- `references/upstream/crapper.md`
+- `references/upstream/dryer.md`
+- `references/upstream/mutator.md`
+- `references/upstream/uml-viewer.md` (not bundled)
