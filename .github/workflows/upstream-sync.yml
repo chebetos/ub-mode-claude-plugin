@@ -19,6 +19,8 @@ env:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    outputs:
+      changes: ${{ steps.check.outputs.changes }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -79,3 +81,15 @@ jobs:
           else
             gh pr edit "$BRANCH" --title "$title" --body-file "$RUNNER_TEMP/body.md"
           fi
+
+  dispatch-ci:
+    needs: sync
+    if: needs.sync.outputs.changes == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Dispatch CI on the sync branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
