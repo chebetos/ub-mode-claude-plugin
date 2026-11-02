@@ -1,0 +1,74 @@
+name: Upstream sync
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: upstream-sync
+  cancel-in-progress: false
+
+env:
+  BRANCH: upstream-sync
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v10.3.2
+      - uses: pnpm/action-setup@v6.1.0
+        with:
+          version: 11.9.0
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 26
+      - run: uv sync --frozen
+
+      - name: Check upstreams
+        id: check
+        run: |
+          code=0
+          uv run python -m tools.sync --check > "$RUNNER_TEMP/report.json" || code=$?
+          case "$code" in
+            0) echo "changes=false" >> "$GITHUB_OUTPUT" ;;
+            10) echo "changes=true" >> "$GITHUB_OUTPUT" ;;
+            *) exit "$code" ;;
+          esac
+
+      - name: Apply upstream changes
+        if: steps.check.outputs.changes == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$BRANCH"
+          uv run python -m tools.sync --apply > /dev/null
+
+      - name: Verify plugin
+        if: steps.check.outputs.changes == 'true'
+        run: tools/verify-plugin.sh
+
+      - name: Push branch and open or update PR
+        if: steps.check.outputs.changes == 'true'
+        run: |
+          git push --force-with-lease="$BRANCH" origin "$BRANCH"
+          {
+            echo "Automated weekly sync of upstream commits. Merge with **rebase** to keep one commit per upstream."
+            echo
+            jq -r '.[] | "- `\(.name)` (\(.type)): `\(.old_sha[0:7])` -> `\(.new_sha[0:7])`"' "$RUNNER_TEMP/report.json"
+          } > "$RUNNER_TEMP/body.md"
+          title="chore(upstream): sync ub-mode and tools"
+          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq length)" = "0" ]; then
+            gh pr create --base main --head "$BRANCH" --title "$title" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh pr edit "$BRANCH" --title "$title" --body-file "$RUNNER_TEMP/body.md"
+          fi
