@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -91,6 +92,20 @@ def test_launcher_drops_its_environment_from_path_and_unsets_virtual_env(tmp_pat
     seen = json.loads(done.stdout)
     assert seen["PATH"] == "/usr/bin"
     assert seen["VIRTUAL_ENV"] is None
+
+
+def test_frontmatter_allows_only_the_bundled_launchers_and_read():
+    overlay = (TEMPLATES / "frontmatter.yaml").read_text()
+    line = next(x for x in overlay.splitlines() if x.startswith("allowed-tools:"))
+
+    rules = re.findall(r"Bash\([^)]*\)|\S+", line.removeprefix("allowed-tools:"))
+
+    expected = ["Read"]
+    for tool in ("crapper", "dryer", "mutator"):
+        launcher = "${CLAUDE_SKILL_DIR}/scripts/" + tool
+        expected += [f"Bash({launcher})", f"Bash({launcher} *)"]
+    assert sorted(rules) == sorted(expected)
+    assert not any(rule.startswith("Bash(*") for rule in rules)
 
 
 def _fake_tree(base: Path, name: str, readme: str, license_line: str | None) -> Path:
