@@ -15,10 +15,24 @@ from typing import Protocol
 from tools import build as build_module
 from tools.upstream import GitHub, make_fetcher
 
-ORDER = ("ub-mode", "crapper", "dryer", "mutator", "uml-viewer")
 EXIT_CHANGES = 10
 MAX_LISTED_FILES = 20
 COMMIT_PATHS = ["upstream.lock.json", "plugins"]
+
+
+def _is_tool_code(path: str) -> bool:
+    return path.startswith("src/") or path == "pyproject.toml"
+
+
+# Apply order, and for each upstream which changed file counts as code (feat, not fix).
+CODE_CHANGE: dict[str, Callable[[str], bool]] = {
+    "ub-mode": lambda path: path == "SKILL.md",
+    "crapper": _is_tool_code,
+    "dryer": _is_tool_code,
+    "mutator": _is_tool_code,
+    "uml-viewer": lambda path: False,
+}
+ORDER = tuple(CODE_CHANGE)
 
 
 class Upstream(Protocol):
@@ -54,12 +68,7 @@ def classify(name: str, paths: Sequence[str]) -> str:
     Returns:
         ``feat`` when the skill or tool code changed, otherwise ``fix``.
     """
-    if name == "ub-mode":
-        return "feat" if "SKILL.md" in paths else "fix"
-    if name == "uml-viewer":
-        return "fix"
-    code = any(path.startswith("src/") or path == "pyproject.toml" for path in paths)
-    return "feat" if code else "fix"
+    return "feat" if any(map(CODE_CHANGE[name], paths)) else "fix"
 
 
 def check(lock: dict[str, dict[str, str]], github: Upstream) -> list[Change]:
