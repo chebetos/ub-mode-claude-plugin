@@ -143,12 +143,12 @@ def build(
     launcher = (templates / "launcher.py.tmpl").read_text()
     deps = json.loads((templates / "python-deps.json").read_text())
 
+    trees = {name: fetch(name, pin["repo"], pin["sha"]) for name, pin in lock.items()}
+
     shutil.rmtree(skill_dir / "scripts", ignore_errors=True)
     shutil.rmtree(skill_dir / "references/upstream", ignore_errors=True)
     (skill_dir / "scripts/vendor").mkdir(parents=True)
     (skill_dir / "references/upstream").mkdir(parents=True)
-
-    trees = {name: fetch(name, pin["repo"], pin["sha"]) for name, pin in lock.items()}
 
     upstream_skill = (trees["ub-mode"] / "SKILL.md").read_text()
     values = {"uml_viewer_sha": lock["uml-viewer"]["sha"]}

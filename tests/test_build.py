@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from tools.build import (
     absolutize_links,
     build,
@@ -139,3 +141,18 @@ def test_build_is_idempotent_and_preserves_curated_files(tmp_path: Path):
     second = {p: p.read_bytes() for p in skill.rglob("*") if p.is_file()}
     assert first == second
     assert (skill / "references/usage.md").read_text() == "curated"
+
+
+def test_build_keeps_generated_files_when_a_fetch_fails(tmp_path: Path):
+    lock, trees, templates, skill = _setup(tmp_path)
+    build(lock, skill, templates, lambda name, repo, sha: trees / name)
+    before = {p: p.read_bytes() for p in skill.rglob("*") if p.is_file()}
+
+    def failing(name: str, repo: str, sha: str) -> Path:
+        if name == "mutator":
+            raise RuntimeError("download failed")
+        return trees / name
+
+    with pytest.raises(RuntimeError):
+        build(lock, skill, templates, failing)
+    assert {p: p.read_bytes() for p in skill.rglob("*") if p.is_file()} == before
