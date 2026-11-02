@@ -23,6 +23,21 @@ NO_LICENSE = "none published upstream"
 TreeFetcher = Callable[[str, str, str], Path]
 
 
+def _fill(template: str, values: dict[str, str]) -> str:
+    """Replace every ``{{key}}`` placeholder in a template.
+
+    Args:
+        template: Text containing ``{{key}}`` placeholders.
+        values: Placeholder values by key.
+
+    Returns:
+        The template with the placeholders replaced.
+    """
+    for key, value in values.items():
+        template = template.replace("{{" + key + "}}", value)
+    return template
+
+
 def render_skill(upstream: str, overlay: str, appendix: str, values: dict[str, str]) -> str:
     """Compose SKILL.md: upstream frontmatter + overlay, upstream body, filled appendix.
 
@@ -36,9 +51,7 @@ def render_skill(upstream: str, overlay: str, appendix: str, values: dict[str, s
         The rendered SKILL.md text.
     """
     header, _, body = upstream.removeprefix("---\n").partition("\n---\n")
-    for key, value in values.items():
-        appendix = appendix.replace("{{" + key + "}}", value)
-    return f"---\n{header}\n{overlay.rstrip()}\n---\n{body}\n{appendix}"
+    return f"---\n{header}\n{overlay.rstrip()}\n---\n{body}\n{_fill(appendix, values)}"
 
 
 def absolutize_links(markdown: str, repo: str, sha: str) -> str:
@@ -99,9 +112,7 @@ def render_launcher(template: str, tool: str, repo: str, sha: str, deps: dict[st
     """
     pins = ",\n#   ".join(f'"{name}=={version}"' for name, version in deps.items())
     values = {"dependencies": pins, "tool": tool, "repo": repo, "sha": sha}
-    for key, value in values.items():
-        template = template.replace("{{" + key + "}}", value)
-    return template
+    return _fill(template, values)
 
 
 def _license_name(tree: Path) -> str:
