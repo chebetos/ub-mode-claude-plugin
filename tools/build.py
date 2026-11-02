@@ -110,8 +110,8 @@ def render_launcher(template: str, tool: str, repo: str, sha: str, deps: dict[st
     Returns:
         The launcher script text.
     """
-    pins = ",\n#   ".join(f'"{name}=={version}"' for name, version in deps.items())
-    values = {"dependencies": pins, "tool": tool, "repo": repo, "sha": sha}
+    dependency_lines = ",\n#   ".join(f'"{name}=={version}"' for name, version in deps.items())
+    values = {"dependencies": dependency_lines, "tool": tool, "repo": repo, "sha": sha}
     return _fill(template, values)
 
 
