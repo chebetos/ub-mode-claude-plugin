@@ -5,7 +5,7 @@ description: >
   follows First Make it Work, then Then Make it Right, then Follow Practice.
   Use when the user runs /ub-mode or asks for the reduced principles.
 disable-model-invocation: true
-allowed-tools: Bash(*/ub-mode/scripts/crapper*) Bash(*/ub-mode/scripts/dryer*) Bash(*/ub-mode/scripts/mutator*) Read
+allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/crapper) Bash(${CLAUDE_SKILL_DIR}/scripts/crapper *) Bash(${CLAUDE_SKILL_DIR}/scripts/dryer) Bash(${CLAUDE_SKILL_DIR}/scripts/dryer *) Bash(${CLAUDE_SKILL_DIR}/scripts/mutator) Bash(${CLAUDE_SKILL_DIR}/scripts/mutator *) Read
 ---
 
 # ub-mode
