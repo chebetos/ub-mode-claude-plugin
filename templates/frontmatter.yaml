@@ -1,0 +1,2 @@
+disable-model-invocation: true
+allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/crapper) Bash(${CLAUDE_SKILL_DIR}/scripts/crapper *) Bash(${CLAUDE_SKILL_DIR}/scripts/dryer) Bash(${CLAUDE_SKILL_DIR}/scripts/dryer *) Bash(${CLAUDE_SKILL_DIR}/scripts/mutator) Bash(${CLAUDE_SKILL_DIR}/scripts/mutator *) Read

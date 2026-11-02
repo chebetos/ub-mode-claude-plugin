@@ -1,0 +1,27 @@
+{
+  "ub-mode": {
+    "repo": "unclebob/ub-mode",
+    "ref": "master",
+    "sha": "57a8bdd28e45ed41900ace0bafa2ff76dd9ed70f"
+  },
+  "crapper": {
+    "repo": "unclebob/crapper",
+    "ref": "master",
+    "sha": "6fd92c4c9bcc56efb64a2f8743d5a2993bcfd42d"
+  },
+  "dryer": {
+    "repo": "unclebob/dryer",
+    "ref": "master",
+    "sha": "66ff6d21a42c04afcad89c78a80066176d1294b0"
+  },
+  "mutator": {
+    "repo": "unclebob/mutator",
+    "ref": "main",
+    "sha": "a5a0cb803b66e0cdb8bf471b3b08af701d424a41"
+  },
+  "uml-viewer": {
+    "repo": "unclebob/uml-viewer",
+    "ref": "master",
+    "sha": "f65dafe93b3cb1b4e6bb02dbe41503ed05bd9ebf"
+  }
+}

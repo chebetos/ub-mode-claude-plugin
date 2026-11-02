@@ -1,0 +1,9 @@
+{
+  "name": "ub-mode",
+  "version": "0.0.0",
+  "description": "Disciplined engineering skill (ub-mode) bundled with the crapper, dryer and mutator quality-gate tools.",
+  "author": { "name": "Cesar Delgado" },
+  "homepage": "https://github.com/chebetos/ub-mode-claude-plugin",
+  "repository": "https://github.com/chebetos/ub-mode-claude-plugin",
+  "keywords": ["tdd", "refactoring", "mutation-testing", "crap", "duplication"]
+}

@@ -40,7 +40,8 @@ Format: `type(scope): subject`, lowercase subject, no trailing period. semantic-
 the version from these, so the type matters.
 
 - Types: `feat` (minor), `fix` (patch), `refactor`, `test`, `docs`, `chore`, `ci`.
-  `BREAKING CHANGE:` in the footer means major, and is added by a human only.
+  `BREAKING CHANGE:` in the footer means major, and is added by a human only. A `!` in the header
+  is rejected by commitlint.
 - Scopes (enforced by commitlint): `upstream/ub-mode`, `upstream/crapper`, `upstream/dryer`,
   `upstream/mutator`, `upstream/uml-viewer`, `scripts`, `plugin`, `ci`, `sync`, `docs`.
 - `feat(upstream/...)` when skill or tool code changed upstream, `fix(upstream/...)` when only

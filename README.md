@@ -87,12 +87,15 @@ bundled commit.
 - A GitHub Actions workflow runs it every Monday. When something changed it recreates the
   `upstream-sync` branch, adds **one commit per upstream** (`feat(upstream/crapper): sync to 6fd92c4`
   when skill or tool code changed, `fix(...)` when only documentation did), verifies the plugin,
-  and opens or updates a single pull request.
+  and opens or updates a single pull request. Events caused by `GITHUB_TOKEN` do not start
+  workflows, so the sync workflow dispatches `ci.yml` on the branch; its checks attach to the
+  branch head commit.
 - Pull requests are merged with **rebase** so each commit reaches `main` and
   [semantic-release](https://github.com/semantic-release/semantic-release) can version it. It writes
   one version into `plugin.json` and the marketplace manifest, updates `CHANGELOG.md` and
   creates the GitHub release. Breaking changes are never automatic: add a `BREAKING CHANGE:` footer
-  by hand while reviewing the pull request.
+  by hand while reviewing the pull request. A `!` in the header is rejected by commitlint, because
+  the release analyzer does not treat it as breaking.
 
 ## Repository layout
 

@@ -1,0 +1,6 @@
+plugins/ub-mode/skills/ub-mode/references/upstream
+CHANGELOG.md
+node_modules
+.venv
+pnpm-lock.yaml
+plugins/ub-mode/skills/ub-mode/SKILL.md
