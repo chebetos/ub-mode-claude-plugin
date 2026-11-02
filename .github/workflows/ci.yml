@@ -32,19 +32,4 @@ jobs:
       - uses: actions/setup-node@v7.1.0
         with:
           node-version: 26
-      - name: Versions match
-        run: |
-          plugin=$(jq -r .version plugins/ub-mode/.claude-plugin/plugin.json)
-          market=$(jq -r .metadata.version .claude-plugin/marketplace.json)
-          test "$plugin" = "$market" || { echo "plugin=$plugin marketplace=$market"; exit 1; }
-      - name: Smoke test vendored tools
-        run: |
-          scripts=plugins/ub-mode/skills/ub-mode/scripts
-          for tool in crapper dryer mutator; do "$scripts/$tool" --help > /dev/null; done
-          cd smoke/py_project
-          "$GITHUB_WORKSPACE/$scripts/crapper"
-          test -f .metrics/crap.edn
-      - name: Validate marketplace
-        run: pnpm dlx @anthropic-ai/claude-code@2.1.312 plugin validate --strict .
-      - name: Validate plugin
-        run: pnpm dlx @anthropic-ai/claude-code@2.1.312 plugin validate --strict ./plugins/ub-mode
+      - run: tools/verify-plugin.sh
