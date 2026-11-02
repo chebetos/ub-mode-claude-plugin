@@ -94,7 +94,8 @@ bundled commit.
   [semantic-release](https://github.com/semantic-release/semantic-release) can version it. It writes
   one version into `plugin.json` and the marketplace manifest, updates `CHANGELOG.md` and
   creates the GitHub release. Breaking changes are never automatic: add a `BREAKING CHANGE:` footer
-  by hand while reviewing the pull request.
+  by hand while reviewing the pull request. A `!` in the header is rejected by commitlint, because
+  the release analyzer does not treat it as breaking.
 
 ## Repository layout
 
