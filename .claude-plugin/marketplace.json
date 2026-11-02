@@ -1,0 +1,15 @@
+{
+  "name": "ub-mode-marketplace",
+  "owner": { "name": "Cesar Delgado" },
+  "metadata": {
+    "description": "Marketplace wrapping unclebob/ub-mode and its quality-gate tools.",
+    "version": "0.0.0"
+  },
+  "plugins": [
+    {
+      "name": "ub-mode",
+      "source": "./plugins/ub-mode",
+      "description": "ub-mode skill plus crapper, dryer and mutator launchers and references."
+    }
+  ]
+}
